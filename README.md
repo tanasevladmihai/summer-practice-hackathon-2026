@@ -1,258 +1,124 @@
-# 🏆 Hackathon Challenge — ShowUp2Move
+# ShowUp2Move
+
+ShowUp2Move is a responsive Next.js web app for spontaneous sports matching, event coordination, messaging, and organizer/admin operations.
+
+The current implementation follows the staged plan in `IMPLEMENTATION_BUILD_PLAN.md` and delivers a runnable foundation plus a first vertical slice:
+
+- map-first responsive home screen with activity markers, cassettes, friend activity, and bottom navigation,
+- register/login/logout with secure cookie session scaffolding,
+- profile editor with sports preferences, skill level, play intensity, location privacy, AI opt-in, and ShowUpToday availability,
+- manual event creation and join flow,
+- event and group messaging surface,
+- matching service with explainable compatibility scores and captain assignment,
+- organizer and admin dashboard surfaces,
+- shared validation/types/matching package,
+- SQL migration package for PostgreSQL/PostGIS,
+- Docker and Kubernetes manifests with health probes and resource limits.
+- Optional MCP Toolbox for Databases config for read-only PostgreSQL inspection in Kubernetes.
+
+## Tech Stack
+
+- Next.js App Router with TypeScript
+- React Server Components by default, client components for interactive map/forms/chat
+- Tailwind CSS
+- Zod validation in `@showup2move/shared`
+- PostgreSQL/PostGIS migration SQL in `@showup2move/database`
+- Seeded in-memory data store for the hackathon runnable slice
+- Kubernetes manifests for web, worker, PostgreSQL, Redis, ingress, HPA, network policies, and Cloudflare Tunnel
+
+## Repository Layout
+
+```text
+apps/web              Next.js app, route handlers, server modules, UI
+packages/shared       Domain types, schemas, sports constants, matching logic
+packages/database     SQL migrations and seed data
+packages/config       Shared TypeScript config
+infra/docker          Production Dockerfile
+infra/k8s             Kubernetes base manifests and local overlay
+infra/mcp/toolbox     MCP Toolbox tools.yaml for controlled database tools
+docs/adr              Architecture decision records
+```
+
+## Local Setup
+
+```powershell
+npm install
+copy .env.example .env.local
+npm run dev
+```
+
+The app runs at `http://localhost:3000`.
+
+Seed demo accounts use the password `Showup2026!`:
+
+```text
+mara@example.com
+organizer@example.com
+admin@example.com
+```
+
+## Quality Commands
+
+```powershell
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
+
+`npm run verify` runs the full local quality gate.
+
+## API Highlights
+
+```text
+/api/auth/register
+/api/auth/login
+/api/auth/logout
+/api/profile
+/api/sports
+/api/availability
+/api/events
+/api/events/:id/participants
+/api/messages
+/api/matching/run
+/api/recommendations
+/api/uploads/presign
+/api/admin/overview
+/api/organizer/events
+/api/health/live
+/api/health/ready
+/api/health/startup
+```
+
+## Deployment
+
+Build the production image:
+
+```powershell
+docker build -f infra/docker/web.Dockerfile -t showup2move-web:local .
+```
+
+Apply the local Kubernetes overlay from a configured cluster:
 
-## 🎯 Theme
+```powershell
+kubectl apply -k infra/k8s/overlays/local
+kubectl rollout status deployment/showup2move-web -n showup2move
+```
 
-Build a **smart social sports-matching platform** that helps people quickly organize spontaneous sports activities with others nearby.
+macOS-hosted Kubernetes deployment and self-healing validation are documented in `macos_followup_report.md`.
 
----
+## MCP Toolbox for Databases
 
-## 📝 Challenge Brief
+The app does not require MCP Toolbox at runtime. It is included as an optional cluster service for development/admin continuation work where an AI assistant needs controlled read-only access to PostgreSQL.
 
-Modern schedules make it difficult to maintain fixed sports groups or recurring activities. People want to stay active, but coordinating with others takes too much effort.
+The source config is:
 
-Your challenge is to build **ShowUp2Move** — a platform that enables users to:
+```text
+infra/mcp/toolbox/tools.yaml
+```
 
-- describe themselves quickly,
-- specify sports preferences,
-- declare daily/weekly availability with minimal effort,
-- automatically find compatible groups,
-- coordinate events,
-- and ultimately… just **show up and move**.
+The Kubernetes base mounts the same config through `showup2move-toolbox-config` and runs an internal `showup2move-toolbox` service. Keep this service internal unless you add proper authentication and network controls.
 
-The experience should be:
+## Current Security Note
 
-- ⚡ fast,
-- 🪶 low-friction,
-- 🤝 social,
-- 🌍 and useful in real-world scenarios.
-
----
-
-## 💡 Core Concept
-
-A user:
-
-1. Creates a lightweight profile
-2. Adds preferred sports
-3. Responds to a periodic **“ShowUpToday?”** prompt with Yes/No
-4. Gets matched into a suitable sports group
-5. Joins a group chat
-6. Confirms participation
-7. Receives help coordinating location/logistics
-8. Shows up and plays
-
-The platform should support:
-
-- automatic sport group generation,
-- manual event creation,
-- group coordination,
-- location assistance,
-- and lightweight social interaction.
-
----
-
-## ✨ Expected Features
-
-### 1. User Profiles
-
-Users should be able to:
-
-- add a short description,
-- upload a profile picture (optional),
-- specify sports interests,
-- optionally define skill level/preferences.
-
-### 2. Availability System
-
-The system should:
-
-- ask users periodically (**“ShowUpToday?”**),
-- allow one-click **Yes/No** responses,
-- track availability for upcoming activities.
-
-### 3. Smart Matching
-
-The platform should match users based on:
-
-- sport preferences,
-- availability,
-- group size requirements,
-- optional proximity/location,
-
-…and generate appropriate groups automatically.
-
-**Examples:**
-
-| Sport       | Group Size    |
-| ----------- | ------------- |
-| Football    | 10–14 people  |
-| Tennis      | 2–4 people    |
-| Basketball  | 6–10 people   |
-
-### 4. Captain Selection
-
-For each generated group:
-
-- randomly assign a captain,
-- provide coordination tools,
-- enable organization of the event.
-
-### 5. Group Chat
-
-Matched groups should have:
-
-- dedicated group communication,
-- event discussion,
-- coordination capabilities.
-
-### 6. Event Planning Assistance
-
-The app should assist captains with:
-
-- finding sports venues,
-- displaying pricing/options,
-- helping group members vote,
-- coordinating time/location.
-
-### 7. Manual Event Creation
-
-Users should also be able to:
-
-- manually create events,
-- invite/join participants,
-- specify sport/location/time/details.
-
----
-
-## 🏅 Scoring System
-
-> Points are awarded **up to** the maximum listed below.
-> **Total Suggested Score: 7000+ points**
-
-### Mandatory Foundation
-
-| Feature                                  | Points     |
-| ---------------------------------------- | ---------- |
-| Application runs successfully            | Up to 500p |
-| Functional frontend/backend integration  | Up to 300p |
-| Clean architecture & maintainability     | Up to 300p |
-| Responsive/mobile-friendly UI            | Up to 200p |
-
-### User Profiles
-
-| Feature                          | Points     |
-| -------------------------------- | ---------- |
-| User registration/login          | Up to 300p |
-| User profile creation            | Up to 300p |
-| Sports preferences selection     | Up to 300p |
-| Profile photo upload             | Up to 200p |
-| Skill level/preferences support  | Up to 200p |
-
-### Smart Matching
-
-| Feature                                            | Points     |
-| -------------------------------------------------- | ---------- |
-| Availability “ShowUpToday?” system                 | Up to 500p |
-| Automatic sport matching                           | Up to 500p |
-| Matching users based on descriptions/interests     | Up to 500p |
-| Group-size aware matching                          | Up to 300p |
-| Nearby/proximity-based matching                    | Up to 500p |
-| Match confirmation workflow                        | Up to 300p |
-
-### AI / Smart Enhancements
-
-| Feature                                            | Points     |
-| -------------------------------------------------- | ---------- |
-| Identify sports/interests from profile description | Up to 500p |
-| Identify sports/interests from profile photo       | Up to 500p |
-| AI-generated compatibility scoring                 | Up to 300p |
-| Smart teammate recommendations                     | Up to 300p |
-
-### Communication
-
-| Feature                       | Points     |
-| ----------------------------- | ---------- |
-| Group chat implementation     | Up to 500p |
-| Event-specific group chat     | Up to 500p |
-| Notifications/reminders       | Up to 300p |
-| Real-time updates             | Up to 300p |
-
-### Event & Location Coordination
-
-| Feature                          | Points      |
-| -------------------------------- | ----------- |
-| Automatic captain assignment     | Up to 300p  |
-| Auto-event setup                 | Up to 1000p |
-| Manual event creation            | Up to 500p  |
-| Venue/location suggestions       | Up to 500p  |
-| Price estimation for venues      | Up to 300p  |
-| Group voting/polling system      | Up to 500p  |
-| Maps/location assistance         | Up to 1000p |
-
-### Bonus Features
-
-| Feature                          | Points     |
-| -------------------------------- | ---------- |
-| Calendar integration             | Up to 300p |
-| Weather-aware recommendations    | Up to 300p |
-| Team balancing by skill          | Up to 300p |
-| Gamification/achievements        | Up to 300p |
-| Multi-language support           | Up to 200p |
-| Social sharing/invites           | Up to 200p |
-| Wearables/fitness integrations   | Up to 500p |
-
-### Innovation Bonus
-
-Judges may award additional points for:
-
-- originality,
-- polished UX,
-- scalability,
-- exceptional AI usage,
-- technical creativity,
-- production readiness.
-
-| Category                  | Points      |
-| ------------------------- | ----------- |
-| Innovation & creativity   | Up to 1000p |
-| UX/UI quality             | Up to 500p  |
-| Technical excellence      | Up to 500p  |
-
----
-
-## ⚖️ Judging Criteria
-
-Teams will be evaluated based on:
-
-- Functionality
-- Stability
-- User experience
-- Technical implementation
-- Creativity
-- Real-world usefulness
-- Scalability potential
-
----
-
-## 📦 Expected Outcome
-
-By the end of the hackathon, teams should deliver:
-
-- a working prototype,
-- a short demo,
-- source code,
-- and a presentation explaining:
-  - the problem,
-  - the solution,
-  - architecture,
-  - and future improvements.
-
----
-
-## 🌟 Inspiration
-
-The best solutions will make organizing spontaneous sports activities:
-
-- **frictionless**,
-- **fun**,
-- and **realistic for busy people**.
+`npm audit --omit=dev` currently reports a moderate advisory for Next.js nested `postcss@8.4.31`. The non-force audit fix cannot resolve it, and the force fix would downgrade Next to an unsafe major version. Track the upstream Next.js patched release before public production deployment.
