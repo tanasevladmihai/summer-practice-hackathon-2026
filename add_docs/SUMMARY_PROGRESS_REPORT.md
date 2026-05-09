@@ -36,7 +36,8 @@ This document summarizes the steps taken to set up the server-side environment o
 
 ## 6. Next Steps
 - **Public Domain Validation**: Verify the Cloudflare public hostname once the DNS propagation is complete.
-- **Real-Time Integration**: Ensure Socket.IO/Redis adapter is functioning correctly under the multi-replica web deployment.
-- **AI Matching Demo**: Run a full matching cycle to verify the Gemini-powered enrichment logic against the PostgreSQL store.
+- **Windows Local Container Fallback**: Added `docker-compose.local.yml` and `LOCAL_WINDOWS_CONTAINER_RUNBOOK.md` so the demo can run entirely on this Windows device if Cloudflare or the macOS server is unavailable.
+- **Frontend Stabilization**: The home map now loads the repo-root `.env.local`, uses the normal app shell spacing/navigation, and has a usable local map preview if Google Maps is not available.
+- **AI Matching Demo**: Run a full matching cycle from `/matching`; Gemini uses the server-side `GOOGLE_AI_API_KEY` when available and falls back locally if not.
 
-**The server-side environment is now fully operational and ready for the final demo.**
+**Current recommendation:** use the Windows local container path for the final demo unless the macOS Kubernetes and Cloudflare hostname are confirmed healthy immediately before presenting.

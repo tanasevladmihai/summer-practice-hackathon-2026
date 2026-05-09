@@ -35,6 +35,22 @@ Open:
 http://localhost:3000
 ```
 
+## Local Windows Container Demo
+
+Use this path if Cloudflare DNS or the macOS server is not reliable enough for the presentation:
+
+```powershell
+npm run container:up
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+This runs the production web server, background worker, PostgreSQL/PostGIS, Redis, and a one-shot database migration job on this Windows device. The detailed handoff is in `LOCAL_WINDOWS_CONTAINER_RUNBOOK.md`.
+
 Use these seed accounts:
 
 ```text

@@ -10,6 +10,9 @@
   "scripts": {
     "dev": "npm --workspace @showup2move/web run dev",
     "build": "npm run build --workspace @showup2move/shared && npm run build --workspace @showup2move/database && npm run build --workspace @showup2move/web",
+    "container:up": "docker compose -f docker-compose.local.yml up --build",
+    "container:down": "docker compose -f docker-compose.local.yml down",
+    "container:logs": "docker compose -f docker-compose.local.yml logs -f web worker",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "npm run typecheck --workspace @showup2move/shared && npm run typecheck --workspace @showup2move/database && npm run typecheck --workspace @showup2move/web",

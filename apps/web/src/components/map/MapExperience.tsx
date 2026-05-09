@@ -104,6 +104,8 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
   );
 
   const selectedEvent = selectedId ? visibleEvents.find((event) => event.id === selectedId) ?? null : null;
+  const fallbackMarkers = useMemo(() => getFallbackMarkers(visibleEvents), [visibleEvents]);
+  const showFallbackMap = Boolean(mapError || !mapsApiKey);
 
   useEffect(() => {
     if (selectedId && !visibleEvents.some((event) => event.id === selectedId)) {
@@ -227,11 +229,34 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
       </div>
 
       <div className="map-stage">
-        <div className="google-map" ref={mapElementRef} role="application" aria-label="Google map of nearby events" />
+        {showFallbackMap ? (
+          <div className="map-fallback map-grid" aria-label="Local event map preview">
+            <span className="map-road map-road-one" />
+            <span className="map-road map-road-two" />
+            <span className="map-road map-road-three" />
+            {fallbackMarkers.map((marker) => (
+              <button
+                className={`fallback-marker ${selectedEvent?.id === marker.id ? "is-active" : ""}`}
+                key={marker.id}
+                onClick={() => setSelectedId(marker.id)}
+                style={{ left: `${marker.left}%`, top: `${marker.top}%` }}
+                type="button"
+              >
+                <MapPin size={18} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <div
+          className={`google-map ${showFallbackMap ? "is-hidden" : ""}`}
+          ref={mapElementRef}
+          role="application"
+          aria-label="Google map of nearby events"
+        />
         {mapError ? (
           <div className="map-error" role="status">
             <MapPin size={18} aria-hidden="true" />
-            {mapError} Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable the live map.
+            Local map preview is active. Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable live Google Maps.
           </div>
         ) : null}
 
@@ -274,4 +299,25 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
       </div>
     </section>
   );
+}
+
+function getFallbackMarkers(events: SportsEvent[]) {
+  if (events.length === 0) {
+    return [];
+  }
+
+  const lats = events.map((event) => event.location.coordinates.lat);
+  const lngs = events.map((event) => event.location.coordinates.lng);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const latRange = Math.max(maxLat - minLat, 0.001);
+  const lngRange = Math.max(maxLng - minLng, 0.001);
+
+  return events.map((event) => ({
+    id: event.id,
+    left: 14 + ((event.location.coordinates.lng - minLng) / lngRange) * 72,
+    top: 86 - ((event.location.coordinates.lat - minLat) / latRange) * 72,
+  }));
 }

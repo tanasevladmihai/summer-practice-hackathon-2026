@@ -49,7 +49,7 @@ npm run dev
 
 The app runs at `http://localhost:3000`.
 
-For Google Maps and Gemini, set `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` and `GOOGLE_AI_API_KEY` in `.env.local`. The Gemini key is only used from server route handlers.
+For Google Maps and Gemini, set `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` and `GOOGLE_AI_API_KEY` in the repo-root `.env.local`. The web app loads that root env file even though Next.js runs from `apps/web`. The Gemini key is only used from server route handlers.
 
 Seed demo accounts use the password `Showup2026!`:
 
@@ -94,6 +94,14 @@ npm run build
 ```
 
 ## Deployment
+
+Run the full local container stack on Windows:
+
+```powershell
+npm run container:up
+```
+
+This starts web, worker, PostgreSQL/PostGIS, Redis, and database migrations locally. Detailed steps are in `LOCAL_WINDOWS_CONTAINER_RUNBOOK.md`.
 
 Build the production image:
 
