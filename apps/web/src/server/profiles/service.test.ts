@@ -13,6 +13,7 @@ describe("profiles service", () => {
 
   it("updates a user profile", () => {
     const updated = updateProfile("user_mara", {
+      username: "mara_new",
       displayName: "Mara I.",
       bio: "Updated bio",
       homeArea: "Piata Victoriei",

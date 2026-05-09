@@ -27,6 +27,7 @@ export function registerUser(input: RegisterInput): AuthResult {
   store.users.push(user);
   store.profiles.push({
     userId: user.id,
+    username: input.email.split("@")[0] || "user",
     displayName: input.name,
     bio: "",
     homeArea: "Bucharest",

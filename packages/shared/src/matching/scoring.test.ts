@@ -9,6 +9,7 @@ import {
 
 const profile: Profile = {
   userId: "user_1",
+  username: "mara_i",
   displayName: "Mara Ionescu",
   bio: "Football and evening runs.",
   homeArea: "Piata Victoriei",

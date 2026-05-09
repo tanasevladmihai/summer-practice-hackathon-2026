@@ -40,6 +40,7 @@ export function ProfileEditor({
 
     const payload = {
       profile: {
+        username: String(formData.get("username") ?? profile.username),
         displayName: String(formData.get("displayName") ?? ""),
         bio: String(formData.get("bio") ?? ""),
         avatarUrl: String(formData.get("avatarUrl") ?? ""),
@@ -159,7 +160,11 @@ export function ProfileEditor({
       {settingsOpen ? (
         <section className="grid gap-5 lg:grid-cols-[1fr_24rem]">
           <div className="grid gap-4 rounded-lg border border-black/10 bg-white p-5 shadow-nav">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <label className="grid gap-2 text-sm font-black">
+                Username
+                <input className="profile-input" defaultValue={profile.username} name="username" />
+              </label>
               <label className="grid gap-2 text-sm font-black">
                 Display name
                 <input className="profile-input" defaultValue={profile.displayName} name="displayName" />

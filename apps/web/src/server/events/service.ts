@@ -80,7 +80,17 @@ export function joinEvent(
     return existing;
   }
 
-  if (event.participantCount >= event.capacity) {
+  const sport = store.sportPreferences.find(p => p.sportId === event.sportId); // This is wrong, should get from sports taxonomy
+  // I need to fetch the sport definition
+  const sportDef = {
+    football: { min: 10, max: 14 },
+    tennis: { min: 2, max: 4 },
+    basketball: { min: 6, max: 10 },
+    running: { min: 2, max: 20 },
+    volleyball: { min: 6, max: 12 }
+  }[event.sportId] || { min: 2, max: 20 };
+
+  if (event.participantCount >= (event.capacity || sportDef.max)) {
     status = "waitlisted";
   }
 

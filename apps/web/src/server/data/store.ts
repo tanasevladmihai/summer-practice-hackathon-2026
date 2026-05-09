@@ -4,6 +4,7 @@ import type {
   CompatibilityScore,
   Conversation,
   EventParticipant,
+  Friendship,
   Message,
   ModerationReport,
   Notification,
@@ -59,6 +60,7 @@ export interface AppStore {
   organizerProfiles: OrganizerProfile[];
   venues: Venue[];
   moderationReports: ModerationReport[];
+  friendships: Friendship[];
 }
 
 const globalStore = globalThis as typeof globalThis & {
@@ -73,6 +75,7 @@ export function getStore(): AppStore {
 
 function createSeedStore(): AppStore {
   const now = "2026-05-09T09:30:00.000Z";
+  // ... rest of seed data ...
   const users: User[] = [
     {
       id: "user_mara",
@@ -87,6 +90,30 @@ function createSeedStore(): AppStore {
       email: "andrei@example.com",
       passwordHash: seededHash("Showup2026!", "andrei"),
       name: "Andrei Pop",
+      roles: ["user"],
+      createdAt: now
+    },
+    {
+      id: "user_matei",
+      email: "matei@example.com",
+      passwordHash: seededHash("Showup2026!", "matei"),
+      name: "Matei Georgescu",
+      roles: ["user"],
+      createdAt: now
+    },
+    {
+      id: "user_cristina",
+      email: "cristina@example.com",
+      passwordHash: seededHash("Showup2026!", "cristina"),
+      name: "Cristina Stan",
+      roles: ["user"],
+      createdAt: now
+    },
+    {
+      id: "user_elena",
+      email: "elena@example.com",
+      passwordHash: seededHash("Showup2026!", "elena"),
+      name: "Elena Dumitru",
       roles: ["user"],
       createdAt: now
     },
@@ -111,6 +138,7 @@ function createSeedStore(): AppStore {
   const profiles: Profile[] = [
     {
       userId: "user_mara",
+      username: "mara_i",
       displayName: "Mara",
       bio: "Football midfielder, casual runner, happiest when plans happen fast.",
       avatarUrl:
@@ -123,6 +151,7 @@ function createSeedStore(): AppStore {
     },
     {
       userId: "user_andrei",
+      username: "andrei_p",
       displayName: "Andrei",
       bio: "Basketball and tennis after work. Likes balanced games and clear plans.",
       avatarUrl:
@@ -134,7 +163,44 @@ function createSeedStore(): AppStore {
       coordinates: { lat: 44.467, lng: 26.088 }
     },
     {
+      userId: "user_matei",
+      username: "matei_g",
+      displayName: "Matei",
+      bio: "Running enthusiast, training for half marathon.",
+      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
+      homeArea: "Floreasca",
+      preferredRadiusKm: 10,
+      locationPrivacy: "approximate",
+      allowsAiProfile: true,
+      coordinates: { lat: 44.464, lng: 26.103 }
+    },
+    {
+      userId: "user_cristina",
+      username: "cristi_s",
+      displayName: "Cristina",
+      bio: "Yoga and Pilates fan, but loves a good volleyball match.",
+      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
+      homeArea: "Titan",
+      preferredRadiusKm: 5,
+      locationPrivacy: "precise",
+      allowsAiProfile: true,
+      coordinates: { lat: 44.426, lng: 26.177 }
+    },
+    {
+      userId: "user_elena",
+      username: "elena_d",
+      displayName: "Elena",
+      bio: "Intermediate tennis player, always looking for a partner.",
+      avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80",
+      homeArea: "Dristor",
+      preferredRadiusKm: 7,
+      locationPrivacy: "approximate",
+      allowsAiProfile: true,
+      coordinates: { lat: 44.421, lng: 26.139 }
+    },
+    {
       userId: "organizer_kiseleff",
+      username: "kiseleff_hub",
       displayName: "Kiseleff Sports Hub",
       bio: "Verified organizer running friendly weekly sessions in north-central Bucharest.",
       avatarUrl:
@@ -147,6 +213,7 @@ function createSeedStore(): AppStore {
     },
     {
       userId: "admin_irina",
+      username: "admin_irina",
       displayName: "Irina",
       bio: "Platform operations and safety.",
       homeArea: "Bucharest",
@@ -408,7 +475,14 @@ function createSeedStore(): AppStore {
         createdAt: now
       }
     ],
-    moderationReports: []
+    moderationReports: [],
+    friendships: [
+      {
+        user1Id: "user_mara",
+        user2Id: "user_andrei",
+        createdAt: now
+      }
+    ]
   };
 }
 

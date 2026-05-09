@@ -33,6 +33,7 @@ export default async function ProfilePage() {
     bundle.profile ??
     ({
       userId: user.id,
+      username: user.email.split("@")[0] || "user",
       displayName: user.name,
       bio: "",
       homeArea: "Bucharest",

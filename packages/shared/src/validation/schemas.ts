@@ -25,6 +25,7 @@ export const coordinatesSchema = z.object({
 });
 
 export const profileSchema = z.object({
+  username: z.string().trim().min(2).max(40).regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
   displayName: z.string().trim().min(2).max(80),
   bio: z.string().trim().max(500),
   avatarUrl: z.string().url().optional().or(z.literal("")),

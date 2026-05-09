@@ -49,7 +49,7 @@ export function AuthForm({ mode }: Readonly<{ mode: "login" | "register" }>) {
           Name
           <input
             className="rounded-lg border border-black/10 bg-field px-4 py-3 font-semibold"
-            defaultValue="Mara Ionescu"
+            placeholder="Your name"
             name="name"
             required
           />
@@ -59,7 +59,7 @@ export function AuthForm({ mode }: Readonly<{ mode: "login" | "register" }>) {
         Email
         <input
           className="rounded-lg border border-black/10 bg-field px-4 py-3 font-semibold"
-          defaultValue={mode === "login" ? "mara@example.com" : ""}
+          placeholder="email@example.com"
           name="email"
           required
           type="email"
@@ -69,7 +69,7 @@ export function AuthForm({ mode }: Readonly<{ mode: "login" | "register" }>) {
         Password
         <input
           className="rounded-lg border border-black/10 bg-field px-4 py-3 font-semibold"
-          defaultValue={mode === "login" ? "Showup2026!" : ""}
+          placeholder="••••••••"
           minLength={8}
           name="password"
           required

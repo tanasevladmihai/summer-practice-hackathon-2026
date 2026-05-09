@@ -275,6 +275,29 @@ textarea:focus-visible {
   font-weight: 900;
 }
 
+.send-invite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #101317;
+  color: white;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 800;
+  transition: all 0.2s;
+}
+
+.send-invite-btn:hover:not(:disabled) {
+  background: #25d9f5;
+  color: #101317;
+}
+
+.send-invite-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .event-detail-meta {
   display: flex;
   gap: 0.5rem;

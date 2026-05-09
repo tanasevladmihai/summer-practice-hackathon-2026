@@ -22,6 +22,7 @@ export function updateProfile(userId: string, input: ProfileInput): Profile {
   const store = getStore();
   const profile: Profile = {
     ...input,
+    username: input.username,
     avatarUrl: input.avatarUrl || undefined,
     userId
   };

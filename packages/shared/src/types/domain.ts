@@ -64,6 +64,7 @@ export interface User {
 
 export interface Profile {
   userId: string;
+  username: string;
   displayName: string;
   bio: string;
   avatarUrl?: string;
@@ -246,6 +247,12 @@ export interface ModerationReport {
   reason: string;
   status: "open" | "resolved" | "dismissed";
   resolution?: string;
+  createdAt: string;
+}
+
+export interface Friendship {
+  user1Id: string;
+  user2Id: string;
   createdAt: string;
 }
 
