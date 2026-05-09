@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
+import { loadEnvConfig } from "@next/env";
 import path from "node:path";
+
+loadEnvConfig(path.join(process.cwd(), "../.."));
 
 const nextConfig: NextConfig = {
   output: "standalone",

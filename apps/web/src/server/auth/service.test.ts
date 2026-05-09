@@ -1,50 +1,47 @@
 import { describe, expect, it } from "vitest";
 import { getStore } from "../data/store";
-import { login, register } from "./service";
+import { loginUser, registerUser } from "./service";
 
 describe("auth service", () => {
-  it("registers a new user and creates session", async () => {
+  it("registers a new user and creates session", () => {
     const store = getStore();
     const beforeCount = store.users.length;
-    
-    const result = await register({
-      email: "new_test@example.com",
+    const email = `new_${crypto.randomUUID()}@example.com`;
+
+    const result = registerUser({
+      email,
       password: "password123",
-      displayName: "New Tester"
+      name: "New Tester",
     });
 
     expect(result.user.id).toBeTruthy();
-    expect(result.user.email).toBe("new_test@example.com");
-    expect(result.session.id).toBeTruthy();
+    expect(result.user.email).toBe(email);
+    expect(result.session.token).toBeTruthy();
     expect(result.session.userId).toBe(result.user.id);
     expect(store.users.length).toBe(beforeCount + 1);
   });
 
-  it("fails to register duplicate email", async () => {
-    await expect(
-      register({
-        email: "irina@showup2move.com", // existing seed data
+  it("fails to register duplicate email", () => {
+    expect(() =>
+      registerUser({
+        email: "mara@example.com",
         password: "password123",
-        displayName: "Irina Clone"
-      })
-    ).rejects.toThrow("Email already in use.");
+        name: "Mara Clone",
+      }),
+    ).toThrow("Email is already registered.");
   });
 
-  it("logs in with correct credentials", async () => {
-    const result = await login("irina@showup2move.com", "password123");
-    expect(result.user.email).toBe("irina@showup2move.com");
-    expect(result.session.id).toBeTruthy();
+  it("logs in with correct credentials", () => {
+    const result = loginUser({ email: "mara@example.com", password: "Showup2026!" });
+    expect(result.user.email).toBe("mara@example.com");
+    expect(result.session.token).toBeTruthy();
   });
 
-  it("fails to login with bad password", async () => {
-    await expect(login("irina@showup2move.com", "wrong")).rejects.toThrow(
-      "Invalid email or password."
-    );
+  it("fails to login with bad password", () => {
+    expect(() => loginUser({ email: "mara@example.com", password: "wrong" })).toThrow("Invalid email or password.");
   });
 
-  it("fails to login with unknown email", async () => {
-    await expect(login("nobody@example.com", "wrong")).rejects.toThrow(
-      "Invalid email or password."
-    );
+  it("fails to login with unknown email", () => {
+    expect(() => loginUser({ email: "nobody@example.com", password: "wrong" })).toThrow("Invalid email or password.");
   });
 });

@@ -7,7 +7,7 @@ describe("profiles service", () => {
     const bundle = getProfileBundle("user_mara");
 
     expect(bundle.profile).toBeTruthy();
-    expect(bundle.profile?.displayName).toBe("Mara Ionescu");
+    expect(bundle.profile?.displayName).toBe("Mara");
     expect(Array.isArray(bundle.preferences)).toBe(true);
   });
 
