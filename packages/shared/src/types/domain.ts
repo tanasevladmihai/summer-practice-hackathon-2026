@@ -161,3 +161,100 @@ export interface TeammateRecommendation {
   reasonCodes: string[];
   distanceKm: number;
 }
+
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  readAt?: string;
+  createdAt: string;
+}
+
+export interface Post {
+  id: string;
+  userId: string;
+  eventId: string;
+  caption: string;
+  visibility: EventVisibility;
+  sportId: string;
+  eventDate: string;
+  createdAt: string;
+}
+
+export interface PostMedia {
+  id: string;
+  postId: string;
+  url: string;
+  contentType: string;
+  byteSize: number;
+  createdAt: string;
+}
+
+export type PollKind = "time" | "location" | "team" | "other";
+
+export interface Poll {
+  id: string;
+  eventId: string;
+  title: string;
+  kind: PollKind;
+  closesAt?: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
+export interface PollOption {
+  id: string;
+  pollId: string;
+  label: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface PollVote {
+  pollId: string;
+  optionId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface OrganizerProfile {
+  userId: string;
+  organizationName: string;
+  verificationStatus: "pending" | "verified" | "rejected";
+  websiteUrl?: string;
+  createdAt: string;
+}
+
+export interface Venue {
+  id: string;
+  organizerId?: string;
+  name: string;
+  address: string;
+  city: string;
+  coordinates: Coordinates;
+  priceEstimateCents?: number;
+  amenities: string[];
+  createdAt: string;
+}
+
+export interface ModerationReport {
+  id: string;
+  reporterId?: string;
+  subjectUserId?: string;
+  eventId?: string;
+  postId?: string;
+  reason: string;
+  status: "open" | "resolved" | "dismissed";
+  resolution?: string;
+  createdAt: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actorId?: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}

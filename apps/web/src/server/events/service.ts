@@ -102,3 +102,53 @@ export function joinEvent(
 
   return participant;
 }
+
+export function updateEventStatus(
+  eventId: string,
+  status: SportsEvent["status"]
+): SportsEvent {
+  const event = getEvent(eventId);
+
+  if (!event) {
+    throw new Error("Event not found.");
+  }
+
+  event.status = status;
+
+  return event;
+}
+
+export function getEventParticipants(eventId: string): EventParticipant[] {
+  return getStore().participants.filter((p) => p.eventId === eventId);
+}
+
+export function leaveEvent(userId: string, eventId: string): void {
+  const store = getStore();
+  const event = getEvent(eventId);
+
+  if (!event) {
+    throw new Error("Event not found.");
+  }
+
+  const index = store.participants.findIndex(
+    (p) => p.eventId === eventId && p.userId === userId
+  );
+
+  if (index < 0) {
+    throw new Error("Not a participant.");
+  }
+
+  const participant = store.participants[index];
+
+  if (participant && participant.status !== "waitlisted") {
+    event.participantCount = Math.max(0, event.participantCount - 1);
+  }
+
+  store.participants.splice(index, 1);
+
+  const conversation = store.conversations.find((c) => c.eventId === eventId);
+
+  if (conversation) {
+    conversation.participantIds = conversation.participantIds.filter((id) => id !== userId);
+  }
+}

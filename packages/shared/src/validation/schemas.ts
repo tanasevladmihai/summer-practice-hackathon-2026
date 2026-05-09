@@ -92,3 +92,80 @@ export type AvailabilityInput = z.infer<typeof availabilitySchema>;
 export type EventCreateInput = z.infer<typeof eventCreateSchema>;
 export type MessageCreateInput = z.infer<typeof messageCreateSchema>;
 export type UploadRequestInput = z.infer<typeof uploadRequestSchema>;
+
+export const postCreateSchema = z.object({
+  eventId: z.string().trim().min(2).max(80),
+  caption: z.string().trim().max(500),
+  visibility: z.enum(eventVisibilityModes).default("public"),
+  mediaUrls: z.array(z.string().url()).max(10).default([])
+});
+
+export const pollCreateSchema = z.object({
+  title: z.string().trim().min(4).max(120),
+  kind: z.enum(["time", "location", "team", "other"]),
+  closesAt: z.string().datetime().optional(),
+  options: z
+    .array(
+      z.object({
+        label: z.string().trim().min(1).max(120),
+        metadata: z.record(z.unknown()).default({})
+      })
+    )
+    .min(2)
+    .max(10)
+});
+
+export const pollVoteSchema = z.object({
+  optionId: z.string().trim().min(2).max(80)
+});
+
+export const invitationCreateSchema = z.object({
+  targetUserId: z.string().trim().min(2).max(80),
+  eventId: z.string().trim().min(2).max(80),
+  message: z.string().trim().max(280).default("You're invited!")
+});
+
+export const organizerProfileSchema = z.object({
+  organizationName: z.string().trim().min(2).max(120),
+  websiteUrl: z.string().url().optional().or(z.literal(""))
+});
+
+export const moderationReportSchema = z.object({
+  subjectUserId: z.string().trim().min(2).max(80).optional(),
+  eventId: z.string().trim().min(2).max(80).optional(),
+  postId: z.string().trim().min(2).max(80).optional(),
+  reason: z.string().trim().min(10).max(500)
+});
+
+export const adminUserUpdateSchema = z.object({
+  status: z.enum(["active", "suspended"]).optional(),
+  addRole: z.enum(["user", "organizer", "admin"]).optional(),
+  removeRole: z.enum(["user", "organizer", "admin"]).optional()
+});
+
+export const eventUpdateSchema = z.object({
+  status: z
+    .enum([
+      "draft",
+      "suggested",
+      "open",
+      "pending_confirmation",
+      "confirmed",
+      "active",
+      "completed",
+      "cancelled"
+    ])
+    .optional(),
+  title: z.string().trim().min(4).max(120).optional(),
+  description: z.string().trim().min(10).max(1000).optional(),
+  capacity: z.number().int().min(2).max(60).optional()
+});
+
+export type PostCreateInput = z.infer<typeof postCreateSchema>;
+export type PollCreateInput = z.infer<typeof pollCreateSchema>;
+export type PollVoteInput = z.infer<typeof pollVoteSchema>;
+export type InvitationCreateInput = z.infer<typeof invitationCreateSchema>;
+export type OrganizerProfileInput = z.infer<typeof organizerProfileSchema>;
+export type ModerationReportInput = z.infer<typeof moderationReportSchema>;
+export type AdminUserUpdateInput = z.infer<typeof adminUserUpdateSchema>;
+export type EventUpdateInput = z.infer<typeof eventUpdateSchema>;

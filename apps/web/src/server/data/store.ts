@@ -5,11 +5,20 @@ import type {
   Conversation,
   EventParticipant,
   Message,
+  ModerationReport,
+  Notification,
+  OrganizerProfile,
+  Poll,
+  PollOption,
+  PollVote,
+  Post,
+  PostMedia,
   Profile,
   SportsEvent,
   TeammateRecommendation,
   User,
-  UserSportPreference
+  UserSportPreference,
+  Venue
 } from "@showup2move/shared";
 
 export interface SessionRecord {
@@ -40,6 +49,15 @@ export interface AppStore {
   compatibilityScores: CompatibilityScore[];
   recommendations: TeammateRecommendation[];
   auditLogs: AuditRecord[];
+  notifications: Notification[];
+  posts: Post[];
+  postMedia: PostMedia[];
+  polls: Poll[];
+  pollOptions: PollOption[];
+  pollVotes: PollVote[];
+  organizerProfiles: OrganizerProfile[];
+  venues: Venue[];
+  moderationReports: ModerationReport[];
 }
 
 const globalStore = globalThis as typeof globalThis & {
@@ -352,7 +370,44 @@ function createSeedStore(): AppStore {
         entityId: "showup2move",
         createdAt: now
       }
-    ]
+    ],
+    notifications: [
+      {
+        id: "notif_seed_1",
+        userId: "user_mara",
+        title: "Match found!",
+        body: "You've been matched for Kiseleff five-a-side. Check your events.",
+        createdAt: now
+      }
+    ],
+    posts: [],
+    postMedia: [],
+    polls: [],
+    pollOptions: [],
+    pollVotes: [],
+    organizerProfiles: [
+      {
+        userId: "organizer_kiseleff",
+        organizationName: "Kiseleff Sports Hub",
+        verificationStatus: "verified",
+        websiteUrl: "https://kiseleffsports.example.com",
+        createdAt: now
+      }
+    ],
+    venues: [
+      {
+        id: "venue_kiseleff",
+        organizerId: "organizer_kiseleff",
+        name: "Parcul Kiseleff Mini Pitch",
+        address: "Soseaua Pavel D. Kiseleff 32",
+        city: "Bucharest",
+        coordinates: { lat: 44.4596, lng: 26.0823 },
+        priceEstimateCents: 2500,
+        amenities: ["lighting", "water", "parking"],
+        createdAt: now
+      }
+    ],
+    moderationReports: []
   };
 }
 

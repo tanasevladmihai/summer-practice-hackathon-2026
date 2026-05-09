@@ -20,8 +20,7 @@ spec:
           imagePullPolicy: IfNotPresent
           command:
             - node
-            - -e
-            - "setInterval(() => console.log(JSON.stringify({ service: 'worker', task: 'heartbeat', at: new Date().toISOString() })), 30000)"
+            - apps/web/src/server/worker.js
           envFrom:
             - configMapRef:
                 name: showup2move-config
