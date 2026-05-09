@@ -1,18 +1,30 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Sparkles, Trophy, UsersRound } from "lucide-react";
+import { Bot, Sparkles, Trophy, UsersRound } from "lucide-react";
 import type { CompatibilityScore, TeammateRecommendation } from "@showup2move/shared";
 
+interface AIProfilePayload {
+  extractedSports: string[];
+  extractedInterests: string[];
+  moderationFlags: string[];
+  compatibilityNotes: string[];
+  profileSummary: string;
+  provider: "gemini" | "local";
+  updatedAt: string;
+}
+
 export function MatchingPanel({
-  initialRecommendations
+  initialRecommendations,
 }: Readonly<{
   initialRecommendations: TeammateRecommendation[];
 }>) {
   const [scores, setScores] = useState<CompatibilityScore[]>([]);
   const [captainId, setCaptainId] = useState<string | undefined>();
   const [message, setMessage] = useState("");
+  const [aiProfile, setAiProfile] = useState<AIProfilePayload | undefined>();
   const [isPending, startTransition] = useTransition();
+  const [isAiPending, startAiTransition] = useTransition();
 
   function runMatching() {
     setMessage("");
@@ -29,6 +41,21 @@ export function MatchingPanel({
         setMessage("Matches refreshed with current availability.");
       } else {
         setMessage("Log in to run matching.");
+      }
+    });
+  }
+
+  function enrichProfile() {
+    setMessage("");
+    startAiTransition(async () => {
+      const response = await fetch("/api/ai/profile", { method: "POST" });
+
+      if (response.ok) {
+        const payload = (await response.json()) as { profile?: AIProfilePayload; queued: boolean };
+        setAiProfile(payload.profile);
+        setMessage(payload.profile ? `AI profile updated with ${payload.profile.provider}.` : "Enable AI in profile settings first.");
+      } else {
+        setMessage("Log in to use AI profile enrichment.");
       }
     });
   }
@@ -53,31 +80,17 @@ export function MatchingPanel({
             {isPending ? "Running..." : "Run"}
           </button>
         </div>
-        {message ? (
-          <p className="mt-4 rounded-lg bg-field p-3 text-sm font-black text-slate-700">
-            {message}
-          </p>
-        ) : null}
+        {message ? <p className="mt-4 rounded-lg bg-field p-3 text-sm font-black text-slate-700">{message}</p> : null}
         <div className="mt-5 grid gap-3">
           {(scores.length ? scores : seedScores).map((score) => (
-            <article
-              className="rounded-lg border border-black/10 bg-field p-4"
-              key={score.targetId}
-            >
+            <article className="rounded-lg border border-black/10 bg-field p-4" key={score.targetId}>
               <div className="flex items-center justify-between gap-3">
-                <h3 className="truncate text-sm font-black">
-                  {score.targetId.replaceAll("_", " ")}
-                </h3>
-                <span className="rounded-full bg-cyan px-3 py-1 text-sm font-black">
-                  {score.score}
-                </span>
+                <h3 className="truncate text-sm font-black">{score.targetId.replaceAll("_", " ")}</h3>
+                <span className="rounded-full bg-cyan px-3 py-1 text-sm font-black">{score.score}</span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {score.reasonCodes.map((reason) => (
-                  <span
-                    className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-700"
-                    key={reason}
-                  >
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-700" key={reason}>
                     {reason.replaceAll("_", " ")}
                   </span>
                 ))}
@@ -88,6 +101,41 @@ export function MatchingPanel({
       </section>
 
       <aside className="grid content-start gap-4">
+        <section className="rounded-lg border border-black/10 bg-white p-5 shadow-nav">
+          <div className="flex items-center gap-3">
+            <Bot className="h-6 w-6 text-court" />
+            <h2 className="text-xl font-black">AI profile</h2>
+          </div>
+          <p className="mt-3 text-sm font-semibold text-slate-600">
+            {aiProfile?.profileSummary ?? "Generate a sports profile from your bio, preferences, and availability."}
+          </p>
+          {aiProfile ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[...aiProfile.extractedSports, ...aiProfile.extractedInterests].slice(0, 6).map((item) => (
+                <span className="rounded-full bg-field px-3 py-1 text-xs font-black" key={item}>
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {aiProfile?.compatibilityNotes.length ? (
+            <ul className="mt-3 grid gap-2 text-xs font-bold text-slate-600">
+              {aiProfile.compatibilityNotes.slice(0, 3).map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          ) : null}
+          <button
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-cyan px-4 py-2 text-sm font-black text-ink disabled:opacity-60"
+            disabled={isAiPending}
+            onClick={enrichProfile}
+            type="button"
+          >
+            <Sparkles className="h-4 w-4" />
+            {isAiPending ? "Updating..." : "Update AI"}
+          </button>
+        </section>
+
         <section className="rounded-lg border border-black/10 bg-white p-5 shadow-nav">
           <div className="flex items-center gap-3">
             <Trophy className="h-6 w-6 text-coral" />
@@ -107,13 +155,10 @@ export function MatchingPanel({
               <article className="rounded-lg bg-field p-3" key={recommendation.userId}>
                 <div className="flex items-center justify-between">
                   <h3 className="font-black">{recommendation.displayName}</h3>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black">
-                    {recommendation.score}
-                  </span>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black">{recommendation.score}</span>
                 </div>
                 <p className="mt-2 text-xs font-bold text-slate-600">
-                  {recommendation.distanceKm.toFixed(1)} km ·{" "}
-                  {recommendation.reasonCodes.join(", ")}
+                  {recommendation.distanceKm.toFixed(1)} km - {recommendation.reasonCodes.join(", ")}
                 </p>
               </article>
             ))}
@@ -129,12 +174,12 @@ const seedScores: CompatibilityScore[] = [
     userId: "demo",
     targetId: "event_football_kiseleff",
     score: 92,
-    reasonCodes: ["same_sport", "available_now", "close_distance", "similar_skill"]
+    reasonCodes: ["same_sport", "available_now", "close_distance", "similar_skill"],
   },
   {
     userId: "demo",
     targetId: "event_basketball_victoriei",
     score: 78,
-    reasonCodes: ["close_distance", "friend_attending"]
-  }
+    reasonCodes: ["close_distance", "friend_attending"],
+  },
 ];

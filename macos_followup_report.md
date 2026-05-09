@@ -1,5 +1,7 @@
 # macOS Follow-up Report
 
+Final continuation notes were added in `macos_final_followup_report.md`. Use that file together with `FINAL_PRESENTATION_RUNBOOK.md` for the current Cloudflare, database, and judge-demo steps.
+
 This Windows 11 environment can build and verify the app locally, but the following items require the macOS server or its Kubernetes context.
 
 ## macOS-only or macOS-server-bound Tasks

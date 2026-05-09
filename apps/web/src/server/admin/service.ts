@@ -1,4 +1,4 @@
-import type { AdminUserUpdateInput, ModerationReport, ModerationReportInput, UserRole } from "@showup2move/shared";
+import type { AdminUserUpdateInput, ModerationReport, ModerationReportInput } from "@showup2move/shared";
 import { getStore, newId, type AuditRecord } from "../data/store";
 
 export function getAdminDashboard() {
@@ -119,6 +119,7 @@ export function createAuditLog(
     action,
     entityType,
     entityId,
+    metadata,
     createdAt: new Date().toISOString()
   };
 

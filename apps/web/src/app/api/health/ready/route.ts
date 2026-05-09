@@ -1,13 +1,15 @@
 import { getStore } from "@/server/data/store";
+import { checkPostgres } from "@/server/data/postgres";
 import { jsonOk } from "@/server/http";
 
-export function GET() {
+export async function GET() {
   const store = getStore();
+  const databaseStatus = await checkPostgres();
 
   return jsonOk({
     status: "ready",
     dependencies: {
-      database: process.env.DATABASE_URL ? "configured" : "using-seed-store",
+      database: databaseStatus === "not-configured" ? "using-seed-store" : databaseStatus,
       redis: process.env.REDIS_URL ? "configured" : "not-configured"
     },
     seedCounts: {

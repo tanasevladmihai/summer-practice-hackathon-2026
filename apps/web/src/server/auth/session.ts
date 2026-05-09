@@ -1,7 +1,7 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import type { User, UserRole } from "@showup2move/shared";
-import { getStore, newId, type SessionRecord } from "../data/store";
+import { getStore, type SessionRecord } from "../data/store";
 
 export const sessionCookieName = "showup2move_session";
 
@@ -40,7 +40,7 @@ export function verifyPassword(password: string, storedHash: string | undefined)
 export function createSession(userId: string): SessionRecord {
   const store = getStore();
   const session: SessionRecord = {
-    token: newId("session"),
+    token: randomBytes(32).toString("base64url"),
     userId,
     expiresAt: new Date(Date.now() + sessionCookieOptions.maxAge * 1000).toISOString()
   };

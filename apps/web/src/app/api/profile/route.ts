@@ -1,6 +1,7 @@
 import { profileSchema, sportPreferenceSchema } from "@showup2move/shared";
 import { z } from "zod";
 import { requireCurrentUser } from "@/server/auth/session";
+import { enqueueProfileEnrichment } from "@/server/ai/service";
 import {
   getProfileBundle,
   replaceSportPreferences,
@@ -29,6 +30,7 @@ export async function PUT(request: Request) {
     const input = await readJson(request, profileUpdateSchema);
     const profile = updateProfile(user.id, input.profile);
     const preferences = replaceSportPreferences(user.id, input.sportPreferences);
+    enqueueProfileEnrichment(user.id);
 
     return jsonOk({ profile, preferences });
   } catch (error) {
