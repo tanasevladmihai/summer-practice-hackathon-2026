@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MapPin, Navigation, Search, SlidersHorizontal, X } from "lucide-react";
+import { MapPin, Navigation, Search, SlidersHorizontal, UserRound, X } from "lucide-react";
 import type { Sport, SportsEvent } from "@showup2move/shared";
 
 interface MapExperienceProps {
@@ -46,9 +46,8 @@ declare global {
 }
 
 function loadGoogleMaps(apiKey: string): Promise<void> {
-  if (!apiKey) {
-    return Promise.reject(new Error("Google Maps API key is missing."));
-  }
+  // Use a fallback key or no key to allow loading in Dev Mode with watermarks
+  const effectiveKey = apiKey || "AIzaSy_DEV_MODE_WATERMARK_EXPECTED";
 
   if (window.google?.maps) {
     return Promise.resolve();
@@ -71,7 +70,7 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
     script.async = true;
     script.defer = true;
     script.dataset.showupGoogleMaps = "true";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(effectiveKey)}`;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Google Maps failed to load."));
     document.head.appendChild(script);
@@ -83,6 +82,7 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
 export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperienceProps) {
   const [query, setQuery] = useState("");
   const [sport, setSport] = useState<string | "all">("all");
+  const [viewType, setViewType] = useState<"active" | "scheduled">("active");
   const [selectedId, setSelectedId] = useState<string | null>(events[0]?.id ?? null);
   const [mapError, setMapError] = useState<string | null>(null);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
@@ -104,8 +104,7 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
   );
 
   const selectedEvent = selectedId ? visibleEvents.find((event) => event.id === selectedId) ?? null : null;
-  const fallbackMarkers = useMemo(() => getFallbackMarkers(visibleEvents), [visibleEvents]);
-  const showFallbackMap = Boolean(mapError || !mapsApiKey);
+  const showFallbackMap = false; // Force real map for dev purposes
 
   useEffect(() => {
     if (selectedId && !visibleEvents.some((event) => event.id === selectedId)) {
@@ -118,7 +117,7 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
 
     loadGoogleMaps(mapsApiKey)
       .then(() => {
-        if (cancelled || !window.google?.maps || !mapElementRef.current || visibleEvents.length === 0) {
+        if (cancelled || !window.google?.maps || !mapElementRef.current) {
           return;
         }
 
@@ -132,11 +131,15 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
           googleMapRef.current ??
           new maps.Map(mapElementRef.current, {
             center,
-            disableDefaultUI: false,
-            fullscreenControl: false,
-            mapTypeControl: false,
-            streetViewControl: false,
+            disableDefaultUI: true,
             zoom: 13,
+            styles: [
+              {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }],
+              },
+            ],
           });
 
         googleMapRef.current = map;
@@ -165,7 +168,7 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
 
         if (markersRef.current.length > 1) {
           map.fitBounds(bounds);
-        } else {
+        } else if (markersRef.current.length === 1) {
           map.panTo(center);
           map.setZoom(14);
         }
@@ -195,71 +198,53 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
   }, [selectedEvent]);
 
   return (
-    <section className="map-shell">
-      <div className="map-toolbar">
-        <div>
-          <p className="eyebrow">Live city map</p>
-          <h1>Find the next game around you</h1>
-        </div>
-
-        <div className="map-controls" aria-label="Map filters">
-          <label className="search-control">
-            <Search size={16} aria-hidden="true" />
-            <span className="sr-only">Search events</span>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search venue, sport, event"
-            />
-          </label>
-
-          <label className="select-control">
-            <SlidersHorizontal size={16} aria-hidden="true" />
-            <span className="sr-only">Filter by sport</span>
-            <select value={sport} onChange={(event) => setSport(event.target.value)}>
-              <option value="all">All sports</option>
-              {sports.map((sportOption) => (
-                <option key={sportOption.id} value={sportOption.id}>
-                  {sportOption.name}
-                </option>
-              ))}
-            </select>
-          </label>
+    <section className="map-shell-fullscreen">
+      <div className="top-left-overlay">
+        <div className="toggle-container">
+          <button 
+            className={`toggle-btn ${viewType === "active" ? "is-active" : ""}`}
+            onClick={() => setViewType("active")}
+          >
+            now
+          </button>
+          <button 
+            className={`toggle-btn ${viewType === "scheduled" ? "is-active" : ""}`}
+            onClick={() => setViewType("scheduled")}
+          >
+            scheduled
+          </button>
         </div>
       </div>
 
-      <div className="map-stage">
-        {showFallbackMap ? (
-          <div className="map-fallback map-grid" aria-label="Local event map preview">
-            <span className="map-road map-road-one" />
-            <span className="map-road map-road-two" />
-            <span className="map-road map-road-three" />
-            {fallbackMarkers.map((marker) => (
-              <button
-                className={`fallback-marker ${selectedEvent?.id === marker.id ? "is-active" : ""}`}
-                key={marker.id}
-                onClick={() => setSelectedId(marker.id)}
-                style={{ left: `${marker.left}%`, top: `${marker.top}%` }}
-                type="button"
-              >
-                <MapPin size={18} aria-hidden="true" />
-              </button>
-            ))}
+      <div className="top-right-overlay">
+        <div className="friend-cassette">
+          <div className="friend-info">
+            <span className="friend-label">Friend</span>
+            <span className="friend-name">username123</span>
           </div>
-        ) : null}
+          <div className="activity-status">
+            <span className="status-is">IS AT</span>
+            <div className="activity-details">
+              <div className="friend-avatar-placeholder">
+                <UserRound size={32} />
+              </div>
+              <div className="activity-image-placeholder">
+                <MapPin size={32} />
+              </div>
+            </div>
+            <button className="more-link">more</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="map-stage-fullscreen">
         <div
-          className={`google-map ${showFallbackMap ? "is-hidden" : ""}`}
+          className="google-map-fullscreen"
           ref={mapElementRef}
           role="application"
           aria-label="Google map of nearby events"
         />
-        {mapError ? (
-          <div className="map-error" role="status">
-            <MapPin size={18} aria-hidden="true" />
-            Local map preview is active. Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable live Google Maps.
-          </div>
-        ) : null}
-
+        
         {selectedEvent ? (
           <article className="event-detail-panel" aria-live="polite">
             <button
@@ -281,21 +266,6 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
             </div>
           </article>
         ) : null}
-      </div>
-
-      <div className="event-strip" aria-label="Visible events">
-        {visibleEvents.map((event) => (
-          <button
-            key={event.id}
-            type="button"
-            className={`event-card-button ${selectedEvent?.id === event.id ? "is-active" : ""}`}
-            onClick={() => setSelectedId(event.id)}
-          >
-            <span>{sports.find((sportOption) => sportOption.id === event.sportId)?.name ?? event.sportId}</span>
-            <strong>{event.title}</strong>
-            <small>{event.location.name}</small>
-          </button>
-        ))}
       </div>
     </section>
   );

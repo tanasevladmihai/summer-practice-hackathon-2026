@@ -13,19 +13,19 @@ export function AppNav() {
   return (
     <nav
       aria-label="Primary"
-      className="safe-bottom fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-[34rem] items-end justify-center px-4"
+      className="safe-bottom fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-[36rem] items-end justify-center px-4"
     >
-      <div className="flex w-full items-center justify-between gap-2 rounded-[2rem] bg-zinc-200/95 px-4 py-3 shadow-nav backdrop-blur md:max-w-[32rem]">
+      <div className="flex w-full items-center justify-between gap-3 rounded-[3rem] bg-zinc-100/90 px-5 py-4 shadow-2xl backdrop-blur-xl border border-white/20">
         {items.map((item) => {
           const Icon = item.icon;
 
           return (
             <Link
               aria-label={item.label}
-              className={`grid aspect-square place-items-center rounded-full transition hover:-translate-y-0.5 hover:shadow-marker ${
+              className={`grid aspect-square place-items-center rounded-full transition-all duration-300 hover:-translate-y-2 hover:shadow-lg ${
                 item.primary
-                  ? "h-20 w-20 bg-cyan text-ink"
-                  : "h-16 w-16 bg-cyan text-ink md:h-[4.5rem] md:w-[4.5rem]"
+                  ? "h-20 w-20 bg-[#25d9f5] text-[#101317] scale-110 shadow-xl"
+                  : "h-14 w-14 bg-[#25d9f5] text-[#101317] md:h-16 md:w-16"
               }`}
               href={item.href}
               key={item.href}
@@ -33,8 +33,8 @@ export function AppNav() {
             >
               <Icon
                 aria-hidden="true"
-                className={item.primary ? "h-10 w-10" : "h-8 w-8"}
-                strokeWidth={2.8}
+                className={item.primary ? "h-10 w-10" : "h-7 w-7"}
+                strokeWidth={2.5}
               />
             </Link>
           );

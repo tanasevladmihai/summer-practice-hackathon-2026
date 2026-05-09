@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   return (
-    <main className="min-h-dvh bg-field px-4 pb-36 pt-5 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-dvh bg-field text-ink relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
         <MapExperience
           events={listEvents()}
           sports={listSports()}
