@@ -165,6 +165,16 @@ textarea:focus-visible {
   color: white;
 }
 
+.friend-cassette-sketch {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  width: 18rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
 .friend-cassette {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(8px);

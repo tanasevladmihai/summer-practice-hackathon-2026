@@ -31,10 +31,10 @@ export function verifyPassword(password: string, storedHash: string | undefined)
     return false;
   }
 
-  const candidate = Buffer.from(scryptSync(password, salt, 64).toString("hex"));
-  const expected = Buffer.from(key);
+  const candidate = scryptSync(password, salt, 64);
+  const expected = Buffer.from(key, "hex");
 
-  return candidate.length === expected.length && timingSafeEqual(candidate, expected);
+  return timingSafeEqual(candidate, expected);
 }
 
 export function createSession(userId: string): SessionRecord {

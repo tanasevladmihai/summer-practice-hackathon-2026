@@ -13,6 +13,8 @@ export function MessageCenter({ initialThreads }: Readonly<{ initialThreads: Thr
   const [selectedId, setSelectedId] = useState(initialThreads[0]?.id ?? "");
   const [isPending, startTransition] = useTransition();
   const [isCreatingPoll, setIsCreatingPoll] = useState(false);
+  const [isStartingNewChat, setIsStartingNewChat] = useState(false);
+  const [friends, setFriends] = useState<any[]>([]);
   const [pollTitle, setPollTitle] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [activePolls, setActivePolls] = useState<Record<string, any>>({});
@@ -20,6 +22,30 @@ export function MessageCenter({ initialThreads }: Readonly<{ initialThreads: Thr
   const selectedThread = threads.find((thread) => thread.id === selectedId) ?? threads[0];
 
   useEffect(() => {
+    if (isStartingNewChat) {
+      fetch("/api/profile/friends")
+        .then(res => res.json())
+        .then(data => setFriends(data.friends || []));
+    }
+  }, [isStartingNewChat]);
+
+  async function startDirectChat(targetUserId: string) {
+    const res = await fetch("/api/messages/direct", {
+      method: "POST",
+      body: JSON.stringify({ targetUserId }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (res.ok) {
+      const { conversationId } = await res.json();
+      setIsStartingNewChat(false);
+      // Refresh the page to get new threads
+      window.location.reload();
+    }
+  }
+
+  useEffect(() => {
+// ... existing polls logic ...
     if (selectedThread?.eventId) {
       fetch(`/api/events/polls/details?eventId=${selectedThread.eventId}`)
         .then(res => res.json())
@@ -87,6 +113,13 @@ export function MessageCenter({ initialThreads }: Readonly<{ initialThreads: Thr
   return (
     <div className="grid min-h-[34rem] overflow-hidden rounded-lg border border-black/10 bg-white shadow-nav lg:grid-cols-[20rem_1fr]">
       <aside className="border-b border-black/10 bg-field p-3 lg:border-b-0 lg:border-r">
+        <button 
+          onClick={() => setIsStartingNewChat(true)}
+          className="w-full mb-3 flex items-center justify-center gap-2 bg-ink text-white px-4 py-3 rounded-xl text-sm font-black hover:bg-slate-800 transition"
+        >
+          <Plus size={16} />
+          New Message
+        </button>
         <div className="grid gap-2">
           {threads.map((thread) => (
             <button
@@ -118,6 +151,43 @@ export function MessageCenter({ initialThreads }: Readonly<{ initialThreads: Thr
             </button>
           )}
         </header>
+
+        {/* New Chat Friend Selection Modal */}
+        {isStartingNewChat && (
+          <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm p-6 animate-in fade-in zoom-in-95">
+            <div className="max-w-md mx-auto bg-white rounded-3xl shadow-2xl border border-black/10 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-black">New Message</h3>
+                <button onClick={() => setIsStartingNewChat(false)} className="text-slate-400 hover:text-ink">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="space-y-2">
+                <span className="text-sm font-black">Your Friends</span>
+                {friends.length === 0 && (
+                  <p className="text-sm text-slate-500 py-4">No friends found. Add some from the map!</p>
+                )}
+                {friends.map((friend) => (
+                  <button 
+                    key={friend.userId}
+                    onClick={() => startDirectChat(friend.userId)}
+                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-cyan/10 rounded-2xl transition text-left"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
+                      {friend.avatarUrl ? <img src={friend.avatarUrl} className="w-full h-full object-cover" /> : <UserRound size={20} className="m-2.5 text-slate-400" />}
+                    </div>
+                    <div>
+                      <div className="text-sm font-black">{friend.displayName}</div>
+                      <div className="text-xs font-bold text-slate-500">
+                        {friend.event ? `Currently at ${friend.event.title}` : "Online"}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Poll Creation Modal */}
         {isCreatingPoll && (

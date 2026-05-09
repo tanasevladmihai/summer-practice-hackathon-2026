@@ -356,28 +356,50 @@ export function MapExperience({ events, sports, mapsApiKey = "" }: MapExperience
 
         {/* Friend Cassette */}
         {friends.length > 0 && (
-          <div className="friend-cassette">
-            <div className="friend-info">
-              <span className="friend-label">Friend</span>
-              <span className="friend-name">{friendWithActivity?.displayName || mainFriend?.displayName}</span>
-            </div>
-            <div className="activity-status">
-              <span className="status-is">{friendWithActivity ? "IS AT" : "is online"}</span>
-              <div className="activity-details">
-                <div className="friend-avatar-placeholder overflow-hidden">
+          <div className="friend-cassette-sketch animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Friend</span>
+                <span className="text-xs font-black truncate">@{friendWithActivity?.username || mainFriend?.username || "username123"}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-sm font-black italic text-ink">IS AT</span>
+              </div>
+              
+              <div className="flex justify-center items-center">
+                <div className="w-16 h-16 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden flex-shrink-0">
                   {(friendWithActivity?.avatarUrl || mainFriend?.avatarUrl) ? (
                     <img src={friendWithActivity?.avatarUrl || mainFriend?.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <UserRound size={32} />
+                    <UserRound size={32} className="m-4 text-slate-400" />
                   )}
                 </div>
-                {friendWithActivity && (
-                  <div className="activity-image-placeholder overflow-hidden">
-                    <img src={friendWithActivity.event.imageUrl} alt="Event" className="w-full h-full object-cover" />
-                  </div>
-                )}
               </div>
-              <button className="more-link">more</button>
+              
+              <div className="flex justify-center items-center">
+                <div className="w-16 h-16 rounded-xl bg-slate-200 border-2 border-white shadow-sm overflow-hidden flex-shrink-0">
+                  {friendWithActivity ? (
+                    <img src={friendWithActivity.event.imageUrl} alt="Event" className="w-full h-full object-cover" />
+                  ) : (
+                    <MapPin size={32} className="m-4 text-slate-400" />
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center mt-3 pt-3 border-t border-black/5">
+              <button 
+                onClick={() => handleSendToFriend("", friendWithActivity?.userId || mainFriend?.userId)}
+                className="text-[10px] font-black text-slate-400 hover:text-cyan uppercase tracking-widest transition"
+              >
+                message
+              </button>
+              <button 
+                onClick={() => friendWithActivity ? setSelectedId(friendWithActivity.event.id) : null}
+                className="text-[10px] font-black text-cyan hover:text-ink uppercase tracking-widest transition"
+              >
+                more
+              </button>
             </div>
           </div>
         )}

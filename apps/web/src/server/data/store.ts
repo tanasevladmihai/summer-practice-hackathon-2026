@@ -63,19 +63,18 @@ export interface AppStore {
   friendships: Friendship[];
 }
 
-const globalStore = globalThis as typeof globalThis & {
-  showUp2MoveStore?: AppStore;
-};
+const g = globalThis as any;
 
 export function getStore(): AppStore {
-  globalStore.showUp2MoveStore ??= createSeedStore();
+  if (!g.showUp2MoveStore) {
+    g.showUp2MoveStore = createSeedStore();
+  }
 
-  return globalStore.showUp2MoveStore;
+  return g.showUp2MoveStore;
 }
 
 function createSeedStore(): AppStore {
   const now = "2026-05-09T09:30:00.000Z";
-  // ... rest of seed data ...
   const users: User[] = [
     {
       id: "user_mara",
@@ -274,6 +273,30 @@ function createSeedStore(): AppStore {
 
   const events: SportsEvent[] = [
     {
+      id: "event_yoga_herastrau",
+      title: "Morning Flow Yoga",
+      sportId: "yoga",
+      imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=640&q=80",
+      startsAt: "2026-05-09T09:00:00.000Z",
+      endsAt: "2026-05-09T11:00:00.000Z",
+      status: "active",
+      visibility: "public",
+      location: {
+        name: "Herastrau Island",
+        address: "Soseaua Nordului 1",
+        city: "Bucharest",
+        coordinates: { lat: 44.4707, lng: 26.0844 },
+        priceEstimateCents: 0
+      },
+      distanceKm: 2.1,
+      skillRange: ["beginner", "advanced"],
+      capacity: 20,
+      participantCount: 15,
+      captainId: "user_cristina",
+      description: "Ongoing session. Feel free to drop in and join our flow!",
+      reasonCodes: ["available_now", "close_distance"]
+    },
+    {
       id: "event_football_kiseleff",
       title: "Kiseleff five-a-side",
       sportId: "football",
@@ -353,6 +376,12 @@ function createSeedStore(): AppStore {
 
   const participants: EventParticipant[] = [
     {
+      eventId: "event_yoga_herastrau",
+      userId: "user_cristina",
+      status: "confirmed",
+      joinedAt: "2026-05-09T08:00:00.000Z"
+    },
+    {
       eventId: "event_football_kiseleff",
       userId: "user_mara",
       status: "confirmed",
@@ -367,6 +396,15 @@ function createSeedStore(): AppStore {
   ];
 
   const conversations: Conversation[] = [
+    {
+      id: "conversation_yoga",
+      kind: "event",
+      title: "Morning Flow Yoga",
+      eventId: "event_yoga_herastrau",
+      participantIds: ["user_cristina", "user_mara"],
+      unreadCount: 0,
+      updatedAt: "2026-05-09T09:00:00.000Z"
+    },
     {
       id: "conversation_football",
       kind: "event",
@@ -480,6 +518,11 @@ function createSeedStore(): AppStore {
       {
         user1Id: "user_mara",
         user2Id: "user_andrei",
+        createdAt: now
+      },
+      {
+        user1Id: "user_mara",
+        user2Id: "user_cristina",
         createdAt: now
       }
     ]
